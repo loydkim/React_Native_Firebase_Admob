@@ -39,18 +39,18 @@ function App(): JSX.Element {
   );
   const [adLoaded, setAdLoaded] = useState(false);
 
+  // Test interstitial
+  const interstitial = InterstitialAd.createAd(TestIds.INTERSTITIAL);
+
+  /*** If you want to use your AD unit Id ***/
+
+  // const interstitial = InterstitialAd.createAd(
+  //   Platform.OS === 'ios'
+  //     ? 'YOUR_IOS_INTERSTITIALAD_UNIT_ID' // ex) ca-app-pub-6884803621329557/4984547374
+  //     : 'YOUR_ANDROID_INTERSTITIALAD_UNIT_ID', // ex) ca-app-pub-6884803621329557/1290798655
+  // );
+
   useEffect(() => {
-    // Test interstitial
-    const interstitial = InterstitialAd.createAd(TestIds.INTERSTITIAL);
-
-    /*** If you want to use your AD unit Id ***/
-
-    // const interstitial = InterstitialAd.createAd(
-    //   Platform.OS === 'ios'
-    //     ? 'YOUR_IOS_INTERSTITIALAD_UNIT_ID' // ex) ca-app-pub-6884803621329557/4984547374
-    //     : 'YOUR_ANDROID_INTERSTITIALAD_UNIT_ID', // ex) ca-app-pub-6884803621329557/1290798655
-    // );
-
     setInterstitialAd(interstitial);
 
     const subscriptions = [
@@ -89,7 +89,7 @@ function App(): JSX.Element {
             if (adLoaded) {
               console.log('show Full Ad');
               interstitialAd?.show();
-              setInterstitialAd(interstitialAd);
+              setInterstitialAd(interstitial);
             } else {
               console.log('Not adLoaded');
             }
