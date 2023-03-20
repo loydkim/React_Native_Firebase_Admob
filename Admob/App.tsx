@@ -5,9 +5,10 @@
  * @format
  */
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
+  Button,
+  Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -17,43 +18,14 @@ import {
   View,
 } from 'react-native';
 
+import {Colors} from 'react-native/Libraries/NewAppScreen';
+
 import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+  InterstitialAd,
+} from '@react-native-admob/admob';
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -61,6 +33,35 @@ function App(): JSX.Element {
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
+
+  const [interstitialAd, setInterstitialAd] = useState<InterstitialAd | null>(
+    null,
+  );
+  const [adLoaded, setAdLoaded] = useState(false);
+
+  useEffect(() => {
+    // Test interstitial
+    const interstitial = InterstitialAd.createAd(TestIds.INTERSTITIAL);
+
+    /*** If you want to use your AD unit Id ***/
+
+    // const interstitial = InterstitialAd.createAd(
+    //   Platform.OS === 'ios'
+    //     ? 'YOUR_IOS_INTERSTITIALAD_UNIT_ID' // ex) ca-app-pub-6884803621329557/4984547374
+    //     : 'YOUR_ANDROID_INTERSTITIALAD_UNIT_ID', // ex) ca-app-pub-6884803621329557/1290798655
+    // );
+
+    setInterstitialAd(interstitial);
+
+    const subscriptions = [
+      interstitial.addEventListener('adLoaded', () => {
+        console.log('interstitial loaded');
+        setAdLoaded(true);
+      }),
+    ];
+
+    return () => subscriptions.forEach(sub => sub.remove());
+  }, []);
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -71,48 +72,32 @@ function App(): JSX.Element {
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
+        <BannerAd size={BannerAdSize.ADAPTIVE_BANNER} unitId={TestIds.BANNER} />
+
+        {/* <BannerAd // If you want to use your AD unit Id
+          size={BannerAdSize.ADAPTIVE_BANNER}
+          unitId={
+            Platform.OS === 'ios'
+              ? 'YOUR_IOS_BANNER_UNIT_ID' // ex) ca-app-pub-6884803621329557/6570474671
+              : 'YOUR_ANDROID_INTERSTITIALAD_UNIT_ID' // ex) ca-app-pub-6884803621329557/1927139197
+          }
+        /> */}
+
+        <Button
+          title="Show full AD"
+          onPress={() => {
+            if (adLoaded) {
+              console.log('show Full Ad');
+              interstitialAd?.show();
+              setInterstitialAd(interstitialAd);
+            } else {
+              console.log('Not adLoaded');
+            }
+          }}
+        />
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;
